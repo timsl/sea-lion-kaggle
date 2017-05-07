@@ -55,7 +55,7 @@ def countception_target(img, coords, img_n=0, size=512, padsize=33):
     n_y = img.shape[1] // size
 
     x_rem = img.shape[0] % size
-    y_rem = img.shape[0] % size
+    y_rem = img.shape[1] % size
 
     boxsize = 20
 
@@ -67,6 +67,13 @@ def countception_target(img, coords, img_n=0, size=512, padsize=33):
             ymax = ymin+size
 
             new_img = img[xmin:xmax, ymin:ymax]
+
+            # Edge case
+            if x == n_x or y == n_y:
+                temp = np.zeros((256, 256, 3), dtype= np.uint8)
+                temp[:new_img.shape[0],:new_img.shape[1],:] = new_img
+                new_img = temp
+
             target_img = np.zeros((size+padsize, size+padsize))
 
             for i in coords:
