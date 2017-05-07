@@ -37,6 +37,7 @@ def extract_points(original, dotted, img_id):
             dotted[x, y], axis = 1))) for x, y in coords]
     return sealioncoords
 
+''' Bounding boxes '''
 def draw_boxes(img, coords):
     xmax, ymax, _ = img.shape
     for i in coords:
@@ -49,10 +50,42 @@ def draw_boxes(img, coords):
             img[i.x+size, i.y-size:i.y+size] = color
     return img
 
-for i in range(42, 43):
+def countception_target(img, coords, img_n=0, size=512, padsize=33):
+    n_x = img.shape[0] // size
+    n_y = img.shape[1] // size
+
+    x_rem = img.shape[0] % size
+    y_rem = img.shape[0] % size
+
+    boxsize = 20
+
+    for x in range(n_x + (x_rem > 0)):
+        for y in range(n_y + (y_rem > 0)):
+            xmin = x*size
+            ymin = y*size
+            xmax = xmin+size 
+            ymax = ymin+size
+
+            new_img = img[xmin:xmax, ymin:ymax]
+            target_img = np.zeros((size+padsize, size+padsize))
+
+            for i in coords:
+                if (i.x-boxsize) > xmin and (i.x+boxsize) < xmax and (i.y-boxsize) > ymin and (i.y+boxsize) < ymax:
+                    target_img[(i.x-boxsize-xmin):(i.x+boxsize-xmax), (i.y-boxsize-ymin):(i.y+boxsize-ymin)] += 30
+
+            cv2.imwrite('TrainSplit/%d_%d_%d.jpg' % (img_n, x, y), cv2.cvtColor(new_img, cv2.COLOR_RGB2BGR))
+            cv2.imwrite('TrainDottedSplit/%d_%d_%d.jpg' % (img_n, x, y), target_img)
+
+for i in range(41, 42):
     img = mpimg.imread("Train/%d.jpg" % i)
     dotted_img = mpimg.imread("TrainDotted/%d.jpg" % i)
+    print("## Extracting coordinates! ##")
     sealioncoords = extract_points(img, dotted_img, i)
-    img_boxes = draw_boxes(img, sealioncoords)
-    plt.imshow(img_boxes)
-    plt.show()
+    print("## Done extracting coordinates! ##")
+    print()
+    print("## Generating countception target images! ##")
+    countception_target(img, sealioncoords, i, 256)
+    print("## Done generating countception target images! ##")
+    
+    #img_boxes = draw_boxes(img, sealioncoords)
+    #plt.imshow(img_boxes)
