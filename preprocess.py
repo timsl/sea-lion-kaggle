@@ -78,7 +78,7 @@ def countception_target(img, coords, img_n=0, size=512, padsize=33):
 
             for i in coords:
                 if (i.x-boxsize) > xmin and (i.x+boxsize) < xmax and (i.y-boxsize) > ymin and (i.y+boxsize) < ymax:
-                    target_img[(i.x-boxsize-xmin):(i.x+boxsize-xmax), (i.y-boxsize-ymin):(i.y+boxsize-ymin)] += 30
+                    target_img[(i.x-boxsize-xmin):(i.x+boxsize-xmax), (i.y-boxsize-ymin):(i.y+boxsize-ymax)] += 30
 
             cv2.imwrite('TrainSplit/%d_%d_%d.jpg' % (img_n, x, y), cv2.cvtColor(new_img, cv2.COLOR_RGB2BGR))
             cv2.imwrite('TrainDottedSplit/%d_%d_%d.jpg' % (img_n, x, y), target_img)
