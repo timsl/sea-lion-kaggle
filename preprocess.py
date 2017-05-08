@@ -97,6 +97,30 @@ def countception_target(img, coords, img_n=0, size=256, padsize=33):
 
     return imgs, target_imgs, counts
 
+def remove_some_negative(x, y, c, negative_ratio=1.0):
+    win_mask = c != 0
+    los_mask = c == 0
+
+    win_x = x[win_mask]
+    win_y = y[win_mask]
+    win_c = c[win_mask]
+    los_x = x[los_mask]
+    los_y = y[los_mask]
+    los_c = c[los_mask]
+
+    order = np.random.permutation(los_c.shape[0])
+    amt = int(win_c.shape[0]*negative_ratio)
+    los_x = los_x[order][0:amt]
+    los_y = los_y[order][0:amt]
+    los_c = los_c[order][0:amt]
+
+    both_x = np.concatenate([win_x, los_x])
+    both_y = np.concatenate([win_y, los_y])
+    both_c = np.concatenate([win_c, los_c])
+    order = np.random.permutation(both_c.shape[0])
+
+    return both_x, both_y, both_c
+
 imgs = []
 target_imgs = []
 counts = []
@@ -120,9 +144,11 @@ for i in range(44, 50):
     #img_boxes = draw_boxes(img, sealioncoords)
     #plt.imshow(img_boxes)
 
-np_imgs = np.array(imgs)
-target_imgs = np.array(target_imgs)
-counts = np.array(counts)
+p_np_imgs = np.array(imgs)
+p_target_imgs = np.array(target_imgs)
+p_counts = np.array(counts)
+
+np_imgs, target_imgs, counts = remove_some_negative(p_np_imgs, p_target_imgs, p_counts, 0.0)
 
 out = open("data_x.p", "wb", 0)
 pickle.dump(np_imgs, out)
