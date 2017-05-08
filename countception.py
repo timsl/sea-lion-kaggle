@@ -38,41 +38,20 @@ def load_triple(fil_prefix):
 
     return x, y, c
 
-def train_generator(batch_size=4):
+def train_generator(batch_size):
     NR_PICKLES = 10
 
     while 1:
         for pickle in range(NR_PICKLES):
-            x, y, c = load_triple("train_" + pickle)
+            x, y, c = load_triple("train_" + str(pickle))
             for i in range(x.shape[0]//batch_size): # Skip odds
                 yield (x[i*batch_size:(i+1)*batch_size],
                        y[i*batch_size:(i+1)*batch_size])
 
 
-np_dataset_x, np_dataset_y, np_dataset_c = load_triple("data")
+np_dataset_x_valid, np_dataset_y_valid, np_dataset_c_valid = load_triple("valid")
+np_dataset_x_test, np_dataset_y_test, np_dataset_c_test = load_triple("test")
 
-print(np_dataset_x.shape)
-print(np_dataset_y.shape)
-print(np_dataset_c.shape)
-
-n = math.floor(np_dataset_x.shape[0] * 0.4)
-
-np_dataset_x_train = np_dataset_x[0:n]
-np_dataset_y_train = np_dataset_y[0:n]
-np_dataset_c_train = np_dataset_c[0:n]
-print("np_dataset_x_train", len(np_dataset_x_train))
-
-print(np.unique(np_dataset_y_train))
-
-np_dataset_x_valid = np_dataset_x[n:2*n]
-np_dataset_y_valid = np_dataset_y[n:2*n]
-np_dataset_c_valid = np_dataset_c[n:2*n]
-print("np_dataset_x_valid", len(np_dataset_x_valid))
-
-np_dataset_x_test = np_dataset_x[2*n:]
-np_dataset_y_test = np_dataset_y[2*n:]
-np_dataset_c_test = np_dataset_c[2*n:]
-print("np_dataset_x_test", len(np_dataset_x_test))
 
 # Keras stuff
 
@@ -152,8 +131,13 @@ if TRAIN:
 
     bestcheck = ModelCheckpoint(filepath="model-best.h5", verbose=1, save_weights_only=True, save_best_only=True)
     every10check = ModelCheckpoint(filepath="model-cp.{epoch:02d}-{val_loss:.2f}.h5", verbose=1, period=10, save_weights_only=True)
-    hist = model.fit(np_dataset_x_train, np_dataset_y_train, epochs=epochs, batch_size = batch_size,
-                     validation_data = (np_dataset_x_valid, np_dataset_y_valid), callbacks=[bestcheck, every10check])
+    # hist = model.fit(np_dataset_x_train, np_dataset_y_train, epochs=epochs, batch_size = batch_size,
+    #                  validation_data = (np_dataset_x_valid, np_dataset_y_valid), callbacks=[bestcheck, every10check])
+    hist = model.fit_generator(train_generator(batch_size),
+                               epochs=epochs,
+                               validation_data=(np_dataset_x_valid, np_dataset_y_valid),
+                               steps_per_epoch=1000,
+                               callbacks=[bestcheck, every10check])
 
     model.save_weights('model.h5')
 
