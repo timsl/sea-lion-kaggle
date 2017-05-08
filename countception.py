@@ -96,7 +96,7 @@ def build_model():
     print("net:", net6.shape)
     net7 = SimpleFactory(32, 96, net6, "net7")
     print("net:", net7.shape)
-    net8 = ConvFactory(32, 17, 0, net7, "net8")
+    net8 = ConvFactory(32, 16, 0, net7, "net8")
     print("net:", net8.shape)
     net9 = ConvFactory(64, 1, 0, net8, "net9")
     print("net:", net9.shape)
