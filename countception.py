@@ -38,6 +38,17 @@ def load_triple(fil_prefix):
 
     return x, y, c
 
+def train_generator(batch_size=4):
+    NR_PICKLES = 10
+
+    while 1:
+        for pickle in range(NR_PICKLES):
+            x, y, c = load_triple("train_" + pickle)
+            for i in range(x.shape[0]//batch_size): # Skip odds
+                yield (x[i*batch_size:(i+1)*batch_size],
+                       y[i*batch_size:(i+1)*batch_size])
+
+
 np_dataset_x, np_dataset_y, np_dataset_c = load_triple("data")
 
 print(np_dataset_x.shape)
