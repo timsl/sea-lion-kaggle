@@ -21,24 +21,30 @@ import cv2
 import math
 
 patch_size = 32
-n = 700
 
 imgs = []
 target_imgs = []
 # Training images
 # Target images
 
-np_dataset_x = np.array(pickle.load(open("data_x.p", "rb")))
-n = math.floor(np_dataset_x.shape[0] * 0.4)
-np_dataset_y = np.array(pickle.load(open("data_y.p", "rb")))
-np_dataset_y = np.reshape(np_dataset_y, (np_dataset_y.shape[0], np_dataset_y.shape[1], np_dataset_y.shape[2], 1))
-np_dataset_c = np.array(pickle.load(open("data_c.p", "rb")))
+def openp(fil):
+    return pickle.load(open(fil, 'rb'))
+
+def load_triple(fil_prefix):
+    x = openp(fil_prefix + "_x.p")
+    y = openp(fil_prefix + "_y.p")
+    y = np.reshape(y, (y.shape[0], y.shape[1], y.shape[2], 1))
+    c = openp(fil_prefix + "_c.p")
+
+    return x, y, c
+
+np_dataset_x, np_dataset_y, np_dataset_c = load_triple("data")
 
 print(np_dataset_x.shape)
 print(np_dataset_y.shape)
 print(np_dataset_c.shape)
 
-
+n = math.floor(np_dataset_x.shape[0] * 0.4)
 
 np_dataset_x_train = np_dataset_x[0:n]
 np_dataset_y_train = np_dataset_y[0:n]
