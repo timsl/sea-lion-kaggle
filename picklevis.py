@@ -41,7 +41,7 @@ def main():
     rng = None
     offset = 0
 
-    if argv >= 2:
+    if argv >= 3:
         r = int(args[2])
         if r < 0:
             rng = -r
