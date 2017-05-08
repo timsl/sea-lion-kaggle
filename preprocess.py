@@ -62,9 +62,11 @@ def countception_target(img, coords, img_n=0, size=256, padsize=33):
 
     imgs = []
     target_imgs = []
+    counts = []
 
     for x in range(n_x + (x_rem > 0)):
         for y in range(n_y + (y_rem > 0)):
+            count = 0
             xmin = x*size
             ymin = y*size
             xmax = xmin+size 
@@ -83,16 +85,19 @@ def countception_target(img, coords, img_n=0, size=256, padsize=33):
             for i in coords:
                 if (i.x-boxsize) > xmin and (i.x+boxsize) < xmax and (i.y-boxsize) > ymin and (i.y+boxsize) < ymax:
                     target_img[(i.x-boxsize-xmin):(i.x+boxsize-xmax), (i.y-boxsize-ymin):(i.y+boxsize-ymax)] += 1
+                    count += 1
 
             imgs.append(new_img)
             target_imgs.append(target_img)
+            counts.append(count)
 
-    return imgs, target_imgs
+    return imgs, target_imgs, counts
 
 imgs = []
 target_imgs = []
+counts = []
 
-for i in range(41, 43):
+for i in range(44, 50):
     print("## Image %d ##" % i)
     img = mpimg.imread("Train/%d.jpg" % i)
     dotted_img = mpimg.imread("TrainDotted/%d.jpg" % i)
@@ -101,9 +106,10 @@ for i in range(41, 43):
     print("## Done extracting coordinates! ##")
     print()
     print("## Generating countception target images! ##")
-    img, target_img = countception_target(img, sealioncoords, i, 256)
+    img, target_img, count = countception_target(img, sealioncoords, i, 256)
     imgs.extend(np.array(img))
     target_imgs.extend(np.array(target_img))
+    counts.extend(np.array(count))
     print("## Done generating countception target images! ##")
     print()
     
@@ -112,9 +118,13 @@ for i in range(41, 43):
 
 np_imgs = np.array(imgs)
 target_imgs = np.array(target_imgs)
+counts = np.array(counts)
 
 out = open("data_x.p", "wb", 0)
 pickle.dump(np_imgs, out)
 
 out = open("data_y.p", "wb", 0)
 pickle.dump(target_imgs, out)
+
+out = open("data_c.p", "wb", 0)
+pickle.dump(counts, out)
