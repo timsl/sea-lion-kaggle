@@ -23,7 +23,7 @@ scale = 1
 patch_size = 32
 framesize = 256
 noutputs = 1
-nsamples = 100
+nsamples = 700
 stride = 1
 ef = (patch_size/stride)**2
 
@@ -35,24 +35,29 @@ target_imgs = []
 np_dataset_x = np.array(pickle.load(open("data_x.p", "rb")))
 np_dataset_y = np.array(pickle.load(open("data_y.p", "rb")))
 np_dataset_y = np.reshape(np_dataset_y, (np_dataset_y.shape[0], np_dataset_y.shape[1], np_dataset_y.shape[2], 1))
+np_dataset_c = np.array(pickle.load(open("data_c.p", "rb")))
 
 print(np_dataset_x.shape)
 print(np_dataset_y.shape)
+print(np_dataset_c.shape)
 
 n = nsamples
 
 np_dataset_x_train = np_dataset_x[0:n]
 np_dataset_y_train = np_dataset_y[0:n]
+np_dataset_c_train = np_dataset_c[0:n]
 print("np_dataset_x_train", len(np_dataset_x_train))
 
 print(np.unique(np_dataset_y_train))
 
 np_dataset_x_valid = np_dataset_x[n:2*n]
 np_dataset_y_valid = np_dataset_y[n:2*n]
+np_dataset_c_valid = np_dataset_c[n:2*n]
 print("np_dataset_x_valid", len(np_dataset_x_valid))
 
 np_dataset_x_test = np_dataset_x[2*n:]
 np_dataset_y_test = np_dataset_y[2*n:]
+np_dataset_c_test = np_dataset_c[2*n:]
 print("np_dataset_x_test", len(np_dataset_x_test))
 
 # Keras stuff
@@ -123,7 +128,7 @@ def plot_map(m, fil):
     plt.imshow(a)
     plt.savefig(fil)
 
-TRAIN=True
+TRAIN=False
 
 if TRAIN:
     batch_size = 4
@@ -142,13 +147,13 @@ else:
     model = build_model()
     model.load_weights("model.h5", by_name=True)
 
-pred = model.predict(np_dataset_x_test[0:20], batch_size=1)
-plot_map(pred[5], "ours")
-plot_map(np_dataset_y_test[5], "theirs")
+pred = model.predict(np_dataset_x_test, batch_size=1)
+plot_map(pred[0], "ours")
+plot_map(np_dataset_y_test[0], "theirs")
 
 preds = sum_count_map(pred)
-#tests = np.concatenate(np_dataset_c_test)
-#order = np.argsort(tests)
-print(preds)
-#print(tests[order])
+tests = np_dataset_c_test
+order = np.argsort(tests)
+print(preds[order])
+print(tests[order])
 
