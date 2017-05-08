@@ -18,6 +18,7 @@ import glob
 import os
 import random
 import cv2
+import math
 
 patch_size = 32
 n = 700
@@ -28,6 +29,7 @@ target_imgs = []
 # Target images
 
 np_dataset_x = np.array(pickle.load(open("data_x.p", "rb")))
+n = math.floor(np_dataset_x.shape[0] * 0.4)
 np_dataset_y = np.array(pickle.load(open("data_y.p", "rb")))
 np_dataset_y = np.reshape(np_dataset_y, (np_dataset_y.shape[0], np_dataset_y.shape[1], np_dataset_y.shape[2], 1))
 np_dataset_c = np.array(pickle.load(open("data_c.p", "rb")))
@@ -86,7 +88,7 @@ def build_model():
     print("net:", net1.shape)
     net2 = SimpleFactory(16, 32, net1, "net2")
     print("net:", net2.shape)
-    net3 = ConvFactory(16, 14, 0, net2, "net3")
+    net3 = ConvFactory(16, 15, 0, net2, "net3")
     print("net:", net3.shape)
     net4 = SimpleFactory(112, 48, net3, "net4")
     print("net:", net4.shape)
@@ -96,7 +98,7 @@ def build_model():
     print("net:", net6.shape)
     net7 = SimpleFactory(32, 96, net6, "net7")
     print("net:", net7.shape)
-    net8 = ConvFactory(32, 16, 0, net7, "net8")
+    net8 = ConvFactory(32, 17, 0, net7, "net8")
     print("net:", net8.shape)
     net9 = ConvFactory(64, 1, 0, net8, "net9")
     print("net:", net9.shape)
@@ -123,7 +125,7 @@ def plot_map(m, fil):
     plt.imshow(a)
     plt.savefig(fil)
 
-TRAIN=False
+TRAIN=0
 
 if TRAIN:
     batch_size = 4
@@ -140,11 +142,13 @@ if TRAIN:
 
 else:
     model = build_model()
-    model.load_weights("model.h5", by_name=True)
+    model.load_weights("model-best.h5", by_name=True)
 
 pred = model.predict(np_dataset_x_test, batch_size=1)
-plot_map(pred[0], "ours")
-plot_map(np_dataset_y_test[0], "theirs")
+plt.imshow(np_dataset_x_test[-1])
+plt.savefig("orig")
+plot_map(pred[-1], "ours")
+plot_map(np_dataset_y_test[-1], "theirs")
 
 preds = sum_count_map(pred)
 tests = np_dataset_c_test
