@@ -119,7 +119,7 @@ def remove_some_negative(x, y, c, negative_ratio=1.0):
     both_c = np.concatenate([win_c, los_c])
     order = np.random.permutation(both_c.shape[0])
 
-    return both_x, both_y, both_c
+    return both_x[order], both_y[order], both_c[order]
 
 imgs = []
 target_imgs = []
