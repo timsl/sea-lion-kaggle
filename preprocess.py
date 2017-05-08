@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from collections import namedtuple
+import pickle
 
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -50,7 +51,7 @@ def draw_boxes(img, coords):
             img[i.x+size, i.y-size:i.y+size] = color
     return img
 
-def countception_target(img, coords, img_n=0, size=512, padsize=33):
+def countception_target(img, coords, img_n=0, size=256, padsize=33):
     n_x = img.shape[0] // size
     n_y = img.shape[1] // size
 
@@ -58,6 +59,9 @@ def countception_target(img, coords, img_n=0, size=512, padsize=33):
     y_rem = img.shape[1] % size
 
     boxsize = 20
+
+    imgs = []
+    target_imgs = []
 
     for x in range(n_x + (x_rem > 0)):
         for y in range(n_y + (y_rem > 0)):
@@ -78,12 +82,18 @@ def countception_target(img, coords, img_n=0, size=512, padsize=33):
 
             for i in coords:
                 if (i.x-boxsize) > xmin and (i.x+boxsize) < xmax and (i.y-boxsize) > ymin and (i.y+boxsize) < ymax:
-                    target_img[(i.x-boxsize-xmin):(i.x+boxsize-xmax), (i.y-boxsize-ymin):(i.y+boxsize-ymax)] += 30
+                    target_img[(i.x-boxsize-xmin):(i.x+boxsize-xmax), (i.y-boxsize-ymin):(i.y+boxsize-ymax)] += 1
 
-            cv2.imwrite('TrainSplit/%d_%d_%d.jpg' % (img_n, x, y), cv2.cvtColor(new_img, cv2.COLOR_RGB2BGR))
-            cv2.imwrite('TrainDottedSplit/%d_%d_%d.jpg' % (img_n, x, y), target_img)
+            imgs.append(new_img)
+            target_imgs.append(target_img)
 
-for i in range(41, 42):
+    return imgs, target_imgs
+
+imgs = []
+target_imgs = []
+
+for i in range(41, 43):
+    print("## Image %d ##" % i)
     img = mpimg.imread("Train/%d.jpg" % i)
     dotted_img = mpimg.imread("TrainDotted/%d.jpg" % i)
     print("## Extracting coordinates! ##")
@@ -91,8 +101,20 @@ for i in range(41, 42):
     print("## Done extracting coordinates! ##")
     print()
     print("## Generating countception target images! ##")
-    countception_target(img, sealioncoords, i, 256)
+    img, target_img = countception_target(img, sealioncoords, i, 256)
+    imgs.extend(np.array(img))
+    target_imgs.extend(np.array(target_img))
     print("## Done generating countception target images! ##")
+    print()
     
     #img_boxes = draw_boxes(img, sealioncoords)
     #plt.imshow(img_boxes)
+
+np_imgs = np.array(imgs)
+target_imgs = np.array(target_imgs)
+
+out = open("data_x.p", "wb", 0)
+pickle.dump(np_imgs, out)
+
+out = open("data_y.p", "wb", 0)
+pickle.dump(target_imgs, out)
