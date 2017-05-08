@@ -19,13 +19,8 @@ import os
 import random
 import cv2
 
-scale = 1
 patch_size = 32
-framesize = 256
-noutputs = 1
-nsamples = 700
-stride = 1
-ef = (patch_size/stride)**2
+n = 700
 
 imgs = []
 target_imgs = []
@@ -41,7 +36,7 @@ print(np_dataset_x.shape)
 print(np_dataset_y.shape)
 print(np_dataset_c.shape)
 
-n = nsamples
+
 
 np_dataset_x_train = np_dataset_x[0:n]
 np_dataset_y_train = np_dataset_y[0:n]
@@ -119,8 +114,8 @@ def build_model():
 
     return model
 
-def sum_count_map(m, ef=ef):
-    return np.asarray([np.sum(p)/ef for p in m])
+def sum_count_map(m, ef=patch_size):
+    return np.asarray([np.sum(p)/ef**2 for p in m])
 
 def plot_map(m, fil):
     # m is like (256, 256, 1)
