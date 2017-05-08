@@ -51,14 +51,12 @@ def draw_boxes(img, coords):
             img[i.x+size, i.y-size:i.y+size] = color
     return img
 
-def countception_target(img, coords, img_n=0, size=256, padsize=33):
+def countception_target(img, coords, img_n=0, size=256, padsize=16):
     n_x = img.shape[0] // size
     n_y = img.shape[1] // size
 
     x_rem = img.shape[0] % size
     y_rem = img.shape[1] % size
-
-    boxsize = 16
 
     imgs = []
     target_imgs = []
@@ -80,17 +78,25 @@ def countception_target(img, coords, img_n=0, size=256, padsize=33):
                 temp[:new_img.shape[0],:new_img.shape[1],:] = new_img
                 new_img = temp
 
-            target_img = np.zeros((size+padsize, size+padsize))
-
-            new_xmin = xmin + boxsize - 16
-            new_xmax = xmax - boxsize - 17
-            new_ymin = ymin + boxsize - 16
-            new_ymax = ymax - boxsize - 17
+            target_img = np.zeros((size+padsize*2, size+padsize*2))
 
             for i in coords:
-                if (i.x-boxsize) > xmin-16 and (i.x+boxsize) < xmax+17 and (i.y-boxsize) > ymin-16 and (i.y+boxsize) < ymax+17:
-                    target_img[(i.x-new_xmin):(i.x-new_xmax), (i.y-new_ymin):(i.y-new_ymax)] += 1
-                    count += 1
+                # In 256x256-coords
+                unpad_x = i.x - xmin
+                unpad_y = i.y - ymin
+                if unpad_x < 0 or unpad_y < 0 or unpad_x >= size or unpad_y >= size:
+                    continue
+
+                # In 288x288-coords
+                pad_x = unpad_x + padsize
+                pad_y = unpad_y + padsize
+                assert pad_x - padsize >= 0
+                assert pad_x + padsize < size + 2*padsize
+                assert pad_y - padsize >= 0
+                assert pad_y + padsize < size + 2*padsize
+
+                target_img[(pad_x - padsize):(pad_x + padsize), (pad_y - padsize):(pad_y + padsize)] += 1
+                count += 1
             imgs.append(new_img)
             target_imgs.append(target_img)
             counts.append(count)
@@ -148,7 +154,7 @@ p_np_imgs = np.array(imgs)
 p_target_imgs = np.array(target_imgs)
 p_counts = np.array(counts)
 
-np_imgs, target_imgs, counts = remove_some_negative(p_np_imgs, p_target_imgs, p_counts, 0.0)
+np_imgs, target_imgs, counts = remove_some_negative(p_np_imgs, p_target_imgs, p_counts, 1.0)
 
 out = open("data_x.p", "wb", 0)
 pickle.dump(np_imgs, out)
