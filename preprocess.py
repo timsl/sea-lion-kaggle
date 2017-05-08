@@ -78,7 +78,7 @@ def countception_target(img, coords, img_n=0, size=256, padsize=16):
                 temp[:new_img.shape[0],:new_img.shape[1],:] = new_img
                 new_img = temp
 
-            target_img = np.zeros((size+padsize*2, size+padsize*2))
+            target_img = np.zeros((size+padsize*2, size+padsize*2), dtype=np.uint8)
 
             for i in coords:
                 # In 256x256-coords
