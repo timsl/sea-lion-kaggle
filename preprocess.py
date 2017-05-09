@@ -166,11 +166,12 @@ p_counts = np.array(counts)
 
 np_imgs, target_imgs, counts = remove_some_negative(p_np_imgs, p_target_imgs, p_counts, 1.0)
 
-out = open("data_x.p", "wb", 0)
-pickle.dump(np_imgs, out)
+def pickle_save(x, file_name):
+    with open(file_name, 'wb') as f:
+        pickle.dump(x, f)
 
-out = open("data_y.p", "wb", 0)
-pickle.dump(target_imgs, out)
+PATH = train_0
 
-out = open("data_c.p", "wb", 0)
-pickle.dump(counts, out)
+pickle_save(np_imgs, PATH + "_x.p")
+pickle_save(target_imgs, PATH + "_y.p")
+pickle_save(counts, PATH + "_c.p")
