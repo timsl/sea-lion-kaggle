@@ -20,15 +20,15 @@ import random
 import cv2
 import math
 
-patch_size = 32
+# Whatever was used in preprocessing
+PATCH_SIZE = 32
 
-imgs = []
-target_imgs = []
-# Training images
-# Target images
+def openp(file_name):
+    return pickle.load(open(file_name, 'rb'))
 
-def openp(fil):
-    return pickle.load(open(fil, 'rb'))
+def pickle_save(x, file_name):
+    with open(file_name, 'wb') as f:
+        pickle.dump(x, f)
 
 def load_triple(fil_prefix):
     x = openp(fil_prefix + "_x.p")
@@ -78,7 +78,7 @@ def build_model():
 
     inputs = Input(shape=(256, 256, 3))
     print("inputs:", inputs.shape)
-    c1 = ConvFactory(64, 3, patch_size, inputs, "c1")
+    c1 = ConvFactory(64, 3, PATCH_SIZE, inputs, "c1")
     print("c1", c1.shape)
     net1 = SimpleFactory(16, 16, c1, "net1")
     print("net:", net1.shape)
@@ -108,11 +108,11 @@ def build_model():
     model = keras.models.Model(inputs=inputs, outputs=final)
     print("Model params:", model.count_params())
 
-    model.compile(optimizer = 'adam', loss = 'mae', metrics = ['accuracy'], learning_rate = 0.005)
+    model.compile(optimizer = 'adam', loss = 'mae', learning_rate = 0.005)
 
     return model
 
-def sum_count_map(m, ef=patch_size):
+def sum_count_map(m, ef=PATCH_SIZE):
     return np.asarray([np.sum(p)/ef**2 for p in m])
 
 def plot_map(m, fil):
@@ -129,35 +129,40 @@ if TRAIN:
 
     model = build_model()
 
-    bestcheck = ModelCheckpoint(filepath="model-best.h5", verbose=1, save_weights_only=True, save_best_only=True)
-    every10check = ModelCheckpoint(filepath="model-cp.{epoch:02d}-{val_loss:.2f}.h5", verbose=1, period=10, save_weights_only=True)
-    # hist = model.fit(np_dataset_x_train, np_dataset_y_train, epochs=epochs, batch_size = batch_size,
-    #                  validation_data = (np_dataset_x_valid, np_dataset_y_valid), callbacks=[bestcheck, every10check])
+    saver = ModelCheckpoint(filepath="model-cp.{epoch:02d}-{val_loss:.2f}.h5", verbose=1, save_weights_only=True)
     hist = model.fit_generator(train_generator(batch_size),
                                epochs=epochs,
                                validation_data=(np_dataset_x_valid, np_dataset_y_valid),
                                steps_per_epoch=1000,
-                               callbacks=[bestcheck, every10check])
-
-    model.save_weights('model.h5')
+                               callbacks=[saver])
 
 else:
     model = build_model()
-    model.load_weights("model-best.h5", by_name=True)
+    model.load_weights("model.h5", by_name=True)
 
 pred = model.predict(np_dataset_x_test, batch_size=1)
-plt.imshow(np_dataset_x_test[-1])
-plt.savefig("orig")
-plot_map(pred[-1], "ours")
-plot_map(np_dataset_y_test[-1], "theirs")
+pred_count = sum_count_map(pred)
 
-preds = sum_count_map(pred)
-tests = np_dataset_c_test
-order = np.argsort(tests)
-print(preds[order])
-print(tests[order])
+SAVE_PICKLE = True
+if SAVE_PICKLE:
+    pickle_save(pred, our_test.p)
 
+SAVE_ONE = False
+if SAVE_ONE:
+    plt.imshow(np_dataset_x_test[-1])
+    plt.savefig("orig")
+    plot_map(pred[-1], "ours")
+    plot_map(np_dataset_y_test[-1], "theirs")
 
-print('!'*40)
-print("Test MSE:", np.mean((preds-tests)**2))
-print('!'*40)
+PRINT_COUNTS = False
+if PRINT_COUNTS:
+    tests = np_dataset_c_test
+    order = np.argsort(tests)
+    print(pred_count[order])
+    print(tests[order])
+
+PRINT_MSE = True
+if PRINT_MSE:
+    print('!'*40)
+    print("Test MSE:", np.mean((pred_count-tests)**2))
+    print('!'*40)
