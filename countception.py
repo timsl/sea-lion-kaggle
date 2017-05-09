@@ -78,13 +78,15 @@ def build_model():
     print("inputs:", inputs.shape)
     c1 = ConvFactory(64, 3, PATCH_SIZE, inputs, "c1")
     print("c1", c1.shape)
-    net1 = Inception(16, 16, c1, "net1")
+    net1 = Inception(32, 32, c1, "net1")
     print("net:", net1.shape)
-    net2 = Inception(16, 32, net1, "net2")
+    net2 = Inception(32, 32, net1, "net2")
     print("net:", net2.shape)
-    net3 = ConvFactory(16, 15, 0, net2, "net3")
+    net3 = ConvFactory(32, 8, 0, net2, "net3")
     print("net:", net3.shape)
-    net4 = Inception(112, 48, net3, "net4")
+    net3b = ConvFactory(32, 8, 0, net3, "net3b")
+    print("net:", net3b.shape)
+    net4 = Inception(112, 48, net3b, "net4")
     print("net:", net4.shape)
     net5 = Inception(64, 32, net4, "net5")
     print("net:", net5.shape)
@@ -92,9 +94,11 @@ def build_model():
     print("net:", net6.shape)
     net7 = Inception(32, 96, net6, "net7")
     print("net:", net7.shape)
-    net8 = ConvFactory(32, 17, 0, net7, "net8")
+    net8 = ConvFactory(64, 9, 0, net7, "net8")
     print("net:", net8.shape)
-    net9 = ConvFactory(64, 1, 0, net8, "net9")
+    net8b = ConvFactory(64, 9, 0, net8, "net8b")
+    print("net:", net8b.shape)
+    net9 = ConvFactory(64, 1, 0, net8b, "net9")
     print("net:", net9.shape)
     net10 = ConvFactory(64, 1, 0, net9, "net10")
     print("net:", net10.shape)
@@ -119,11 +123,11 @@ def plot_map(m, fil):
     plt.imshow(a)
     plt.savefig(fil)
 
-TRAIN=0
+TRAIN=1
 
 if TRAIN:
     batch_size = 4
-    epochs = 5
+    epochs = 1000
 
     model = build_model()
 
@@ -131,7 +135,7 @@ if TRAIN:
     hist = model.fit_generator(train_generator(batch_size),
                                epochs=epochs,
                                validation_data=(np_dataset_x_valid, np_dataset_y_valid),
-                               steps_per_epoch=1000,
+                               steps_per_epoch=100,
                                callbacks=[saver])
 
 else:
