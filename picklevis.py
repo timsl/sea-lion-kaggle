@@ -60,6 +60,10 @@ def main():
     nplen = min(64, m.shape[0])
     cols = int(np.ceil(np.sqrt(nplen)))
 
+    
+    if m.shape[-1] == 1:
+        m = np.reshape(m, (m.shape[0], m.shape[1], m.shape[2]))
+
     montage(m[offset:offset+nplen], cols)
 
 if __name__ == '__main__':
