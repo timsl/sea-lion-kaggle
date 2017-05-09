@@ -145,7 +145,7 @@ pred_count = sum_count_map(pred)
 
 SAVE_PICKLE = True
 if SAVE_PICKLE:
-    pickle_save(pred, our_test.p)
+    pickle_save(pred, "our_test.p")
 
 SAVE_ONE = False
 if SAVE_ONE:
