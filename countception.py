@@ -156,13 +156,12 @@ if SAVE_ONE:
 
 PRINT_COUNTS = False
 if PRINT_COUNTS:
-    tests = np_dataset_c_test
-    order = np.argsort(tests)
+    order = np.argsort(np_dataset_c_test)
     print(pred_count[order])
-    print(tests[order])
+    print(np_dataset_c_test[order])
 
 PRINT_MSE = True
 if PRINT_MSE:
     print('!'*40)
-    print("Test MSE:", np.mean((pred_count-tests)**2))
+    print("Test MSE:", np.mean((pred_count-np_dataset_c_test)**2))
     print('!'*40)
