@@ -170,7 +170,7 @@ def pickle_save(x, file_name):
     with open(file_name, 'wb') as f:
         pickle.dump(x, f)
 
-PATH = train_0
+PATH = "train_0"
 
 pickle_save(np_imgs, PATH + "_x.p")
 pickle_save(target_imgs, PATH + "_y.p")
