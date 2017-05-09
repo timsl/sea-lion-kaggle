@@ -1,5 +1,3 @@
-# An adaptation from https://github.com/ieee8023/NeuralNetwork-Examples/blob/master/theano/counting/count-ception.ipynb
-
 import matplotlib
 import matplotlib.pyplot as plt
 
