@@ -37,7 +37,7 @@ def load_triple(fil_prefix):
     return x, y, c
 
 def train_generator(batch_size):
-    NR_PICKLES = 10
+    NR_PICKLES = 2
 
     while 1:
         for pickle in range(NR_PICKLES):
@@ -82,9 +82,9 @@ def build_model():
     print("net:", net1.shape)
     net2 = Inception(32, 32, net1, "net2")
     print("net:", net2.shape)
-    net3 = ConvFactory(32, 8, 0, net2, "net3")
+    net3 = ConvFactory(64, 8, 0, net2, "net3")
     print("net:", net3.shape)
-    net3b = ConvFactory(32, 8, 0, net3, "net3b")
+    net3b = ConvFactory(64, 8, 0, net3, "net3b")
     print("net:", net3b.shape)
     net4 = Inception(112, 48, net3b, "net4")
     print("net:", net4.shape)
