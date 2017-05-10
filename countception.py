@@ -124,6 +124,28 @@ def plot_map(m, fil):
     plt.savefig(fil)
 
 TRAIN=1
+SAVE_PICKLE = True
+SAVE_ONE = False
+PRINT_COUNTS = False
+PRINT_MSE = True
+
+if len(sys.argv) >= 2:          # Have some command
+    TRAIN = 0
+    SAVE_PICKLE = 0
+    SAVE_ONE = 0
+    PRINT_COUNTS = 0
+    PRINT_MSE = 0
+
+    cmd = sys.argv[1]
+    if cmd == 'train':
+        TRAIN = 1
+    elif cmd == 'test':
+        TRAIN = 0
+        SAVE_PICKLE = 1
+        PRINT_MSE = 1
+    else:
+        print("Command '", cmd, "' not recognized.")
+        exit(1)
 
 if TRAIN:
     batch_size = 4
@@ -142,27 +164,24 @@ else:
     model = build_model()
     model.load_weights("model.h5", by_name=True)
 
-pred = model.predict(np_dataset_x_test, batch_size=1)
-pred_count = sum_count_map(pred)
+if SAVE_PICKLE or SAVE_ONE or PRINT_COUNTS or PRINT_MSE:
+    pred = model.predict(np_dataset_x_test, batch_size=1)
+    pred_count = sum_count_map(pred)
 
-SAVE_PICKLE = True
 if SAVE_PICKLE:
     pickle_save(pred, "our_test.p")
 
-SAVE_ONE = False
 if SAVE_ONE:
     plt.imshow(np_dataset_x_test[-1])
     plt.savefig("orig")
     plot_map(pred[-1], "ours")
     plot_map(np_dataset_y_test[-1], "theirs")
 
-PRINT_COUNTS = False
 if PRINT_COUNTS:
     order = np.argsort(np_dataset_c_test)
     print(pred_count[order])
     print(np_dataset_c_test[order])
 
-PRINT_MSE = True
 if PRINT_MSE:
     print('!'*40)
     print("Test MSE:", np.mean((pred_count-np_dataset_c_test)**2))
