@@ -39,7 +39,7 @@ def load_triple(fil_prefix):
     return x, y, c
 
 def train_generator(batch_size):
-    NR_PICKLES = 2
+    NR_PICKLES = 9
 
     while 1:
         for pickle in range(NR_PICKLES):
