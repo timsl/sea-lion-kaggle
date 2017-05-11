@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 from collections import namedtuple
 import pickle
+import scipy.stats as ssta
 
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -73,7 +74,7 @@ def countception_target(img, coords, img_n=0, size=256, padsize=16):
             count = 0
             xmin = x*size
             ymin = y*size
-            xmax = xmin+size 
+            xmax = xmin+size
             ymax = ymin+size
 
             new_img = img[xmin:xmax, ymin:ymax]
@@ -86,6 +87,7 @@ def countception_target(img, coords, img_n=0, size=256, padsize=16):
 
             target_img = np.zeros((size+padsize*2, size+padsize*2), dtype=np.uint8)
 
+            matchingcoords = []
             for i in coords:
                 # In 256x256-coords
                 unpad_x = i.x - xmin
@@ -100,9 +102,18 @@ def countception_target(img, coords, img_n=0, size=256, padsize=16):
                 assert pad_x + padsize < size + 2*padsize
                 assert pad_y - padsize >= 0
                 assert pad_y + padsize < size + 2*padsize
+                matchingcoords.append((pad_x, pad_y))
 
-                target_img[(pad_x - padsize):(pad_x + padsize), (pad_y - padsize):(pad_y + padsize)] += 1
-                count += 1
+            padded_size = size + 2*padsize
+            omg = np.zeros((padded_size, padded_size))
+            xv, yv = np.meshgrid(range(padded_size), range(padded_size), indexing='ij')
+            idxs = np.transpose(np.asarray([xv, yv]), [1,2,0])
+            for i in matchingcoords:
+                pad_x, pad_y = i
+                omg += ssta.multivariate_normal.pdf(idxs, mean=[pad_x, pad_y], cov=np.eye(2)*32**2)
+
+            target_img = omg
+            count += len(matchingcoords)
             imgs.append(new_img)
             target_imgs.append(target_img)
             counts.append(count)
