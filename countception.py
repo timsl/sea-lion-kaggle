@@ -80,19 +80,19 @@ def build_model():
     print("inputs:", inputs.shape)
     c1 = ConvFactory(64, 3, PATCH_SIZE, inputs, "c1")
     print("c1", c1.shape)
-    net1 = Inception(16, 16, c1, "net1")
+    net1 = Inception(32, 48, c1, "net1")
     print("net:", net1.shape)
-    net2 = Inception(16, 32, net1, "net2")
+    net2 = Inception(32, 48, net1, "net2")
     print("net:", net2.shape)
     net3 = ConvFactory(16, 15, 0, net2, "net3")
     print("net:", net3.shape)
-    net4 = Inception(112, 48, net3, "net4")
+    net4 = Inception(128, 64, net3, "net4")
     print("net:", net4.shape)
-    net5 = Inception(64, 32, net4, "net5")
+    net5 = Inception(128, 64, net4, "net5")
     print("net:", net5.shape)
-    net6 = Inception(40, 40, net5, "net6")
+    net6 = Inception(96, 96, net5, "net6")
     print("net:", net6.shape)
-    net7 = Inception(32, 96, net6, "net7")
+    net7 = Inception(48, 96, net6, "net7")
     print("net:", net7.shape)
     net8 = ConvFactory(32, 17, 0, net7, "net8")
     print("net:", net8.shape)
@@ -108,12 +108,12 @@ def build_model():
     model = keras.models.Model(inputs=inputs, outputs=final)
     print("Model params:", model.count_params())
 
-    model.compile(optimizer = 'adam', loss = 'mae', learning_rate = 0.005)
+    model.compile(optimizer = 'adam', loss = 'mae', learning_rate = 0.001)
 
     return model
 
 def sum_count_map(m, ef=PATCH_SIZE):
-    return np.asarray([np.sum(p)/ef**2 for p in m])
+    return np.asarray([np.sum(p) for p in m])
 
 def plot_map(m, fil):
     # m is like (256, 256, 1)
