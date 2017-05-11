@@ -85,7 +85,7 @@ def countception_target(img, coords, img_n=0, size=256, padsize=16):
                 temp[:new_img.shape[0],:new_img.shape[1],:] = new_img
                 new_img = temp
 
-            target_img = np.zeros((size+padsize*2, size+padsize*2), dtype=np.uint8)
+            target_img = np.zeros((size+padsize*2, size+padsize*2), dtype=np.float16)
 
             matchingcoords = []
             for i in coords:
@@ -108,14 +108,12 @@ def countception_target(img, coords, img_n=0, size=256, padsize=16):
                 matchingcoords.append((pad_x, pad_y))
 
             padded_size = size + 2*padsize
-            omg = np.zeros((padded_size, padded_size))
             xv, yv = np.meshgrid(range(padded_size), range(padded_size), indexing='ij')
             idxs = np.transpose(np.asarray([xv, yv]), [1,2,0])
             for i in matchingcoords:
                 pad_x, pad_y = i
-                omg += ssta.multivariate_normal.pdf(idxs, mean=[pad_x, pad_y], cov=np.eye(2)*32**2)
+                target_img += ssta.multivariate_normal.pdf(idxs, mean=[pad_x, pad_y], cov=np.eye(2)*32**2)
 
-            target_img = omg
             count += len(matchingcoords)
             imgs.append(new_img)
             target_imgs.append(target_img)
