@@ -133,45 +133,60 @@ def remove_some_negative(x, y, c, negative_ratio=1.0):
 
     return both_x[order], both_y[order], both_c[order]
 
-imgs = []
-target_imgs = []
-counts = []
-
-for i in range(44, 50):
-    if i in BADIMAGES:
-        print("!! SKIPPED Image %d !!" % i)
-        continue
-
-    print("## Image %d ##" % i)
-    img = mpimg.imread("Train/%d.jpg" % i)
-    dotted_img = mpimg.imread("TrainDotted/%d.jpg" % i)
-    print("## Extracting coordinates! ##")
-    sealioncoords = extract_points(img, dotted_img, i)
-    print("## Done extracting coordinates! ##")
-    print()
-    print("## Generating countception target images! ##")
-    img, target_img, count = countception_target(img, sealioncoords, i, 256)
-    imgs.extend(np.array(img))
-    target_imgs.extend(np.array(target_img))
-    counts.extend(np.array(count))
-    print("## Done generating countception target images! ##")
-    print()
-    
-    #img_boxes = draw_boxes(img, sealioncoords)
-    #plt.imshow(img_boxes)
-
-p_np_imgs = np.array(imgs)
-p_target_imgs = np.array(target_imgs)
-p_counts = np.array(counts)
-
-np_imgs, target_imgs, counts = remove_some_negative(p_np_imgs, p_target_imgs, p_counts, 1.0)
-
 def pickle_save(x, file_name):
     with open(file_name, 'wb') as f:
         pickle.dump(x, f)
 
-PATH = "train_0"
+def pickle_many(start, stop, file_prefix):
+    imgs = []
+    target_imgs = []
+    counts = []
 
-pickle_save(np_imgs, PATH + "_x.p")
-pickle_save(target_imgs, PATH + "_y.p")
-pickle_save(counts, PATH + "_c.p")
+    for i in range(start, stop):
+        if i in BADIMAGES:
+            print("!! SKIPPED Image %d !!" % i)
+            continue
+
+        print("## Image %d ##" % i)
+        img = mpimg.imread("Train/%d.jpg" % i)
+        dotted_img = mpimg.imread("TrainDotted/%d.jpg" % i)
+        print("## Extracting coordinates! ##")
+        sealioncoords = extract_points(img, dotted_img, i)
+        print("## Done extracting coordinates! ##")
+        print()
+        print("## Generating countception target images! ##")
+        img, target_img, count = countception_target(img, sealioncoords, i, 256)
+        imgs.extend(np.array(img))
+        target_imgs.extend(np.array(target_img))
+        counts.extend(np.array(count))
+        print("## Done generating countception target images! ##")
+        print()
+
+        #img_boxes = draw_boxes(img, sealioncoords)
+        #plt.imshow(img_boxes)
+
+    p_np_imgs = np.array(imgs)
+    p_target_imgs = np.array(target_imgs)
+    p_counts = np.array(counts)
+
+    np_imgs, target_imgs, counts = remove_some_negative(p_np_imgs, p_target_imgs, p_counts, 1.0)
+
+    pickle_save(np_imgs, file_prefix + "_x.p")
+    pickle_save(target_imgs, file_prefix + "_y.p")
+    pickle_save(counts, file_prefix + "_c.p")
+
+
+for trip in [
+        (0, 100, "train_0"),
+        (100, 200, "train_1"),
+        (200, 300, "train_2"),
+        (300, 400, "train_3"),
+        (400, 500, "train_4"),
+        (500, 600, "train_5"),
+        (600, 700, "train_6"),
+        (700, 800, "train_7"),
+        (800, 900, "train_8"),
+        (930, 945, "test"),
+        (945, 948, "valid")]:
+    start, end, name = trip
+    pickle_many(start, end, name)
