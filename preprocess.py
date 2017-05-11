@@ -169,7 +169,7 @@ def pickle_many(start, stop, file_prefix):
     p_target_imgs = np.array(target_imgs)
     p_counts = np.array(counts)
 
-    np_imgs, target_imgs, counts = remove_some_negative(p_np_imgs, p_target_imgs, p_counts, 1.0)
+    np_imgs, target_imgs, counts = remove_some_negative(p_np_imgs, p_target_imgs, p_counts, 0.0)
 
     pickle_save(np_imgs, file_prefix + "_x.p")
     pickle_save(target_imgs, file_prefix + "_y.p")
