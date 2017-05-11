@@ -60,9 +60,12 @@ def main():
     nplen = min(64, m.shape[0])
     cols = int(np.ceil(np.sqrt(nplen)))
 
-    
+
     if m.shape[-1] == 1:
         m = np.reshape(m, (m.shape[0], m.shape[1], m.shape[2]))
+
+    if m.dtype == np.float16:
+        m = np.array(m/np.max(m)*255, dtype=np.uint8)
 
     montage(m[offset:offset+nplen], cols)
 
