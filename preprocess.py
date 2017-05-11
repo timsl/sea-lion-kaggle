@@ -89,6 +89,9 @@ def countception_target(img, coords, img_n=0, size=256, padsize=16):
 
             matchingcoords = []
             for i in coords:
+                if i.cls == 4:
+                    continue
+
                 # In 256x256-coords
                 unpad_x = i.x - xmin
                 unpad_y = i.y - ymin
