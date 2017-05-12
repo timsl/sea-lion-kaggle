@@ -21,10 +21,18 @@ def montage(imglist, cols=None):
 
     grid = ImageGrid(fig, 111,
                      nrows_ncols=(rows, cols),
-                     axes_pad=0.1)
+                     axes_pad=0.3)
 
     for i in range(nr_images):
-        grid[i].imshow(imglist[i])
+        m = imglist[i]
+
+        if m.shape[-1] != 3:
+            grid[i].set_title(str(np.sum(m)))
+
+        if m.dtype == np.float16:
+            m = np.array(m/np.max(m)*255, dtype=np.uint8)
+
+        grid[i].imshow(m)
         grid[i].axis('off')
 
     plt.show()
@@ -57,15 +65,12 @@ def main():
         np.random.seed(rng)
         np.random.shuffle(m)
 
-    nplen = min(64, m.shape[0])
+    nplen = min(25, m.shape[0])
     cols = int(np.ceil(np.sqrt(nplen)))
 
 
     if m.shape[-1] == 1:
         m = np.reshape(m, (m.shape[0], m.shape[1], m.shape[2]))
-
-    if m.dtype == np.float16:
-        m = np.array(m/np.max(m)*255, dtype=np.uint8)
 
     montage(m[offset:offset+nplen], cols)
 
