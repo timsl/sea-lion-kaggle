@@ -106,7 +106,7 @@ def build_model():
 
 
     model = keras.models.Model(inputs=inputs, outputs=final)
-    print("Model params:", model.count_params())
+    model.summary()
 
     model.compile(optimizer = 'adam', loss = 'mae', learning_rate = 0.005)
 
