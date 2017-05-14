@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import ImageGrid
 import sys
 
+
 def openp(fil):
     return pickle.load(open(fil, 'rb'))
 
@@ -68,11 +69,11 @@ def main():
     nplen = min(25, m.shape[0])
     cols = int(np.ceil(np.sqrt(nplen)))
 
-
     if m.shape[-1] == 1:
         m = np.reshape(m, (m.shape[0], m.shape[1], m.shape[2]))
 
     montage(m[offset:offset+nplen], cols)
+
 
 if __name__ == '__main__':
     main()
