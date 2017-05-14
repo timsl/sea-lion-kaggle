@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
-import matplotlib.pyplot as plt
-
 import pickle
-from keras.layers import Conv2D, BatchNormalization, Input, concatenate, ZeroPadding2D
-from keras.layers.advanced_activations import LeakyReLU
-from keras.callbacks import ModelCheckpoint
-import keras.models
-# from keras.datasets import cifar10
-import numpy as np
 import sys
+
+import numpy as np
+
+import keras.models
+import matplotlib.pyplot as plt
+from keras.callbacks import ModelCheckpoint
+from keras.layers import (BatchNormalization, Conv2D, Input, ZeroPadding2D,
+                          concatenate)
+from keras.layers.advanced_activations import LeakyReLU
 
 # Whatever was used in preprocessing
 PATCH_SIZE = 32

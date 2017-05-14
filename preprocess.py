@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-import numpy as np
-import cv2
-from collections import namedtuple
 import pickle
+from collections import namedtuple
 
+import numpy as np
+
+import cv2
 import matplotlib.image as mpimg
 
 SeaLionCoord = namedtuple('SeaLionCoord', ['img_id', 'x', 'y', 'cls'])
