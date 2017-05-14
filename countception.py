@@ -48,12 +48,12 @@ def train_generator(batch_size):
 
 def ConvFactory(filters, kernel_size, padding, inp, name, padding_type='valid'):
     if padding != 0:
-        padded = ZeroPadding2D(padding)(inp)
+        padded = ZeroPadding2D(padding, name=name+"_pad")(inp)
     else:
         padded = inp
     conv = Conv2D(filters=filters, kernel_size=kernel_size,
                   padding=padding_type, name=name+"_conv")(padded)
-    activated = LeakyReLU(0.01)(conv)
+    activated = LeakyReLU(0.01, name=name+"_relu")(conv)
     bn = BatchNormalization(name=name+"_bn")(activated)
     return bn
 
@@ -61,7 +61,7 @@ def ConvFactory(filters, kernel_size, padding, inp, name, padding_type='valid'):
 def Inception(ch_1x1, ch_3x3, inp, name):
     conv1x1 = ConvFactory(ch_1x1, 1, 0, inp, name + "_1x1")
     conv3x3 = ConvFactory(ch_3x3, 3, 1, inp, name + "_3x3")
-    return concatenate([conv1x1, conv3x3])
+    return concatenate([conv1x1, conv3x3], name=name)
 
 
 def build_model():
@@ -70,32 +70,18 @@ def build_model():
     print('#'*80)
 
     inputs = Input(shape=(256, 256, 3))
-    print("inputs:", inputs.shape)
     c1 = ConvFactory(64, 3, PATCH_SIZE, inputs, "c1")
-    print("c1", c1.shape)
     net1 = Inception(16, 16, c1, "net1")
-    print("net:", net1.shape)
     net2 = Inception(16, 32, net1, "net2")
-    print("net:", net2.shape)
     net3 = ConvFactory(16, 15, 0, net2, "net3")
-    print("net:", net3.shape)
     net4 = Inception(112, 48, net3, "net4")
-    print("net:", net4.shape)
     net5 = Inception(64, 32, net4, "net5")
-    print("net:", net5.shape)
     net6 = Inception(40, 40, net5, "net6")
-    print("net:", net6.shape)
     net7 = Inception(32, 96, net6, "net7")
-    print("net:", net7.shape)
     net8 = ConvFactory(32, 17, 0, net7, "net8")
-    print("net:", net8.shape)
     net9 = ConvFactory(64, 1, 0, net8, "net9")
-    print("net:", net9.shape)
     net10 = ConvFactory(64, 1, 0, net9, "net10")
-    print("net:", net10.shape)
-    # net11 = ConvFactory(1, 1, 0, net10, "net11")
     final = Conv2D(1, 1, name="final")(net10)
-    print("net:", final.shape)
 
     model = keras.models.Model(inputs=inputs, outputs=final)
     model.summary()
