@@ -1,34 +1,28 @@
 #!/usr/bin/env python3
 
-import matplotlib
 import matplotlib.pyplot as plt
 
 import pickle
 from keras.layers import Conv2D, BatchNormalization, Input, concatenate, ZeroPadding2D
-# from keras.layers import Dense, Activation, Lambda, Conv2D, MaxPool2D, Flatten, BatchNormalization, Input, concatenate
 from keras.layers.advanced_activations import LeakyReLU
 from keras.callbacks import ModelCheckpoint
 import keras.models
 # from keras.datasets import cifar10
 import numpy as np
-from skimage.io import imread  #, imsave
-import scipy.misc
 import sys
-import glob
-import os
-import random
-import cv2
-import math
 
 # Whatever was used in preprocessing
 PATCH_SIZE = 32
 
+
 def openp(file_name):
     return pickle.load(open(file_name, 'rb'))
+
 
 def pickle_save(x, file_name):
     with open(file_name, 'wb') as f:
         pickle.dump(x, f)
+
 
 def load_triple(fil_prefix):
     x = openp(fil_prefix + "_x.p")
@@ -38,19 +32,16 @@ def load_triple(fil_prefix):
 
     return x, y, c
 
+
 def train_generator(batch_size):
     NR_PICKLES = 2
 
     while 1:
-        for pickle in range(NR_PICKLES):
-            x, y, c = load_triple("train_" + str(pickle))
-            for i in range(x.shape[0]//batch_size): # Skip odds
+        for p in range(NR_PICKLES):
+            x, y, c = load_triple("train_" + str(p))
+            for i in range(x.shape[0]//batch_size):  # Skip odds
                 yield (x[i*batch_size:(i+1)*batch_size],
                        y[i*batch_size:(i+1)*batch_size])
-
-
-np_dataset_x_valid, np_dataset_y_valid, np_dataset_c_valid = load_triple("valid")
-np_dataset_x_test, np_dataset_y_test, np_dataset_c_test = load_triple("test")
 
 
 # Keras stuff
@@ -60,10 +51,12 @@ def ConvFactory(filters, kernel_size, padding, inp, name, padding_type='valid'):
         padded = ZeroPadding2D(padding)(inp)
     else:
         padded = inp
-    conv = Conv2D(filters=filters, kernel_size=kernel_size, padding=padding_type, name=name+"_conv")(padded)
+    conv = Conv2D(filters=filters, kernel_size=kernel_size,
+                  padding=padding_type, name=name+"_conv")(padded)
     activated = LeakyReLU(0.01)(conv)
     bn = BatchNormalization(name=name+"_bn")(activated)
     return bn
+
 
 def Inception(ch_1x1, ch_3x3, inp, name):
     conv1x1 = ConvFactory(ch_1x1, 1, 0, inp, name + "_1x1")
@@ -104,16 +97,17 @@ def build_model():
     final = Conv2D(1, 1, name="final")(net10)
     print("net:", final.shape)
 
-
     model = keras.models.Model(inputs=inputs, outputs=final)
     model.summary()
 
-    model.compile(optimizer = 'adam', loss = 'mae', learning_rate = 0.005)
+    model.compile(optimizer='adam', loss='mae', learning_rate=0.005)
 
     return model
 
+
 def sum_count_map(m, ef=PATCH_SIZE):
     return np.asarray([np.sum(p)/ef**2 for p in m])
+
 
 def plot_map(m, fil):
     # m is like (256, 256, 1)
@@ -121,7 +115,8 @@ def plot_map(m, fil):
     plt.imshow(a)
     plt.savefig(fil)
 
-TRAIN=1
+
+TRAIN = 1
 SAVE_PICKLE = True
 SAVE_ONE = False
 PRINT_COUNTS = False
@@ -145,16 +140,21 @@ if len(sys.argv) >= 2:          # Have some command
         print("Command '", cmd, "' not recognized.")
         exit(1)
 
+np_dataset_x_valid, np_dataset_y_valid, np_dataset_c_valid = load_triple("valid")
+np_dataset_x_test, np_dataset_y_test, np_dataset_c_test = load_triple("test")
+
+
 if TRAIN:
     batch_size = 4
     epochs = 5
 
     model = build_model()
 
-    saver = ModelCheckpoint(filepath="model-cp.{epoch:02d}-{val_loss:.2f}.h5", verbose=1, save_weights_only=True)
-    hist = model.fit_generator(train_generator(batch_size),
-                               epochs=epochs,
-                               validation_data=(np_dataset_x_valid, np_dataset_y_valid),
+    saver = ModelCheckpoint(filepath="model-cp.{epoch:02d}-{val_loss:.2f}.h5",
+                            verbose=1, save_weights_only=True)
+    hist = model.fit_generator(train_generator(batch_size), epochs=epochs,
+                               validation_data=(np_dataset_x_valid,
+                                                np_dataset_y_valid),
                                steps_per_epoch=1000,
                                callbacks=[saver])
 
