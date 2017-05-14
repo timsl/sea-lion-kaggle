@@ -3,29 +3,30 @@ import cv2
 from collections import namedtuple
 import pickle
 
-import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
 SeaLionCoord = namedtuple('SeaLionCoord', ['img_id', 'x', 'y', 'cls'])
 
 colors = (
-            (243,8,5),          # red
-            (244,8,242),        # magenta
-            (87,46,10),         # brown 
-            (25,56,176),        # blue
-            (38,174,21),        # green
+            (243, 8, 5),          # red
+            (244, 8, 242),        # magenta
+            (87, 46, 10),         # brown
+            (25, 56, 176),        # blue
+            (38, 174, 21),        # green
             )
 
 sizes = (45, 38, 30, 25, 25)
 
-BADIMAGES = [ 3, 7, 9, 21, 30, 34, 71, 81, 89, 97, 151, 184, 215, 234,
-              242, 268, 290, 311, 331, 344, 380, 384, 406, 421, 469, 475, 490,
-              499, 507, 530, 531, 605, 607, 614, 621, 638, 644, 687, 712, 721,
-              767, 779, 781, 794, 800, 811, 839, 840, 869, 882, 901, 903, 905,
-              909, 913, 927, 946 ]
+BADIMAGES = [3, 7, 9, 21, 30, 34, 71, 81, 89, 97, 151, 184, 215, 234,
+             242, 268, 290, 311, 331, 344, 380, 384, 406, 421, 469, 475, 490,
+             499, 507, 530, 531, 605, 607, 614, 621, 638, 644, 687, 712, 721,
+             767, 779, 781, 794, 800, 811, 839, 840, 869, 882, 901, 903, 905,
+             909, 913, 927, 946]
+
 
 def neighbourhood(xs, ys):
     return sum((x-y)**2 for x, y in zip(xs, ys)) > 300
+
 
 def remove_neighbourhood(data, cond):
     coords = []
@@ -34,17 +35,17 @@ def remove_neighbourhood(data, cond):
             coords.append(element)
     return coords
 
+
 def extract_points(original, dotted, img_id):
     diff = cv2.subtract(original, dotted)
     diff[dotted < 30] = 0
     x, y = np.where(np.any(diff > 60, axis=2))
     xy = zip(x, y)
     coords = remove_neighbourhood(xy, neighbourhood)
-    sealioncoords = [SeaLionCoord(img_id, x, y, np.argmin(np.linalg.norm(colors -
-            dotted[x, y], axis = 1))) for x, y in coords]
+    sealioncoords = [SeaLionCoord(img_id, x, y, np.argmin(np.linalg.norm(colors - dotted[x, y], axis=1))) for x, y in coords]
     return sealioncoords
 
-''' Bounding boxes '''
+
 def draw_boxes(img, coords):
     xmax, ymax, _ = img.shape
     for i in coords:
@@ -73,15 +74,15 @@ def countception_target(img, coords, img_n=0, size=256, padsize=16):
             count = 0
             xmin = x*size
             ymin = y*size
-            xmax = xmin+size 
+            xmax = xmin+size
             ymax = ymin+size
 
             new_img = img[xmin:xmax, ymin:ymax]
 
             # Edge case
             if x == n_x or y == n_y:
-                temp = np.zeros((256, 256, 3), dtype= np.uint8)
-                temp[:new_img.shape[0],:new_img.shape[1],:] = new_img
+                temp = np.zeros((256, 256, 3), dtype=np.uint8)
+                temp[:new_img.shape[0], :new_img.shape[1], :] = new_img
                 new_img = temp
 
             target_img = np.zeros((size+padsize*2, size+padsize*2), dtype=np.uint8)
@@ -109,6 +110,7 @@ def countception_target(img, coords, img_n=0, size=256, padsize=16):
 
     return imgs, target_imgs, counts
 
+
 def remove_some_negative(x, y, c, negative_ratio=1.0):
     win_mask = c != 0
     los_mask = c == 0
@@ -133,9 +135,11 @@ def remove_some_negative(x, y, c, negative_ratio=1.0):
 
     return both_x[order], both_y[order], both_c[order]
 
+
 def pickle_save(x, file_name):
     with open(file_name, 'wb') as f:
         pickle.dump(x, f)
+
 
 def pickle_many(start, stop, file_prefix):
     imgs = []
@@ -161,9 +165,6 @@ def pickle_many(start, stop, file_prefix):
         counts.extend(np.array(count))
         print("## Done generating countception target images! ##")
         print()
-
-        #img_boxes = draw_boxes(img, sealioncoords)
-        #plt.imshow(img_boxes)
 
     p_np_imgs = np.array(imgs)
     p_target_imgs = np.array(target_imgs)
