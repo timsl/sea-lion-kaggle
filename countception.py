@@ -136,6 +136,9 @@ if len(sys.argv) >= 2:          # Have some command
         TRAIN = 0
         SAVE_PICKLE = 1
         PRINT_MSE = 1
+    elif cmd == 'print_model':
+        build_model()
+        exit(0)
     else:
         print("Command '", cmd, "' not recognized.")
         exit(1)
