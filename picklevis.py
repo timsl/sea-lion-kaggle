@@ -30,7 +30,7 @@ def montage(imglist, cols=None):
         m = imglist[i]
 
         if m.shape[-1] != 3:
-            grid[i].set_title(str(np.sum(m)))
+            grid[i].set_title(str(np.sum(m) / 32**2))
 
         if m.dtype == np.float16:
             m = np.array(m/np.max(m)*255, dtype=np.uint8)

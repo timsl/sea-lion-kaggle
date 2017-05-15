@@ -97,6 +97,9 @@ def countception_target(img, coords, img_n=0, size=256, padsize=16):
                 if unpad_x < 0 or unpad_y < 0 or unpad_x >= size or unpad_y >= size:
                     continue
 
+                if i.cls == 4:
+                    continue
+
                 # In 288x288-coords
                 pad_x = unpad_x + padsize
                 pad_y = unpad_y + padsize
@@ -173,7 +176,7 @@ def pickle_many(start, stop, file_prefix):
     p_target_imgs = np.array(target_imgs)
     p_counts = np.array(counts)
 
-    np_imgs, target_imgs, counts = remove_some_negative(p_np_imgs, p_target_imgs, p_counts, 0.0)
+    np_imgs, target_imgs, counts = remove_some_negative(p_np_imgs, p_target_imgs, p_counts, 0.05)
 
     pickle_save(np_imgs, file_prefix + "_x.p")
     pickle_save(target_imgs, file_prefix + "_y.p")
