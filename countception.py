@@ -91,12 +91,13 @@ def build_model():
 
     return model
 
+
 class LossHistory(keras.callbacks.Callback):
     def on_train_begin(self, logs={}):
         self.losses = []
         self.val_losses = []
 
-    def on_batch_end(self, batch, logs={}):
+    def on_epoch_end(self, batch, logs={}):
         self.losses.append(logs.get('loss'))
         self.val_losses.append(logs.get('val_loss'))
 
@@ -107,7 +108,9 @@ class LossHistory(keras.callbacks.Callback):
         plt.xlabel('epoch')
         plt.legend(['train', 'valid'], loc='upper left')
         plt.savefig("loss_plot")
-        
+        plt.clf()
+
+
 def sum_count_map(m, ef=PATCH_SIZE):
     return np.asarray([np.sum(p)/ef**2 for p in m])
 
