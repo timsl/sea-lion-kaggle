@@ -97,6 +97,9 @@ def countception_target(img, coords, img_n=0, size=256, padsize=16):
                 if unpad_x < 0 or unpad_y < 0 or unpad_x >= size or unpad_y >= size:
                     continue
 
+                if i.cls == 4:
+                    continue
+
                 # In 288x288-coords
                 pad_x = unpad_x + padsize
                 pad_y = unpad_y + padsize
