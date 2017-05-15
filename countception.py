@@ -35,7 +35,7 @@ def load_triple(fil_prefix):
 
 
 def train_generator(batch_size):
-    NR_PICKLES = 9
+    NR_PICKLES = 1
 
     while 1:
         for p in range(NR_PICKLES):
@@ -93,7 +93,23 @@ def build_model():
 
     return model
 
+class LossHistory(keras.callbacks.Callback):
+    def on_train_begin(self, logs={}):
+        self.losses = []
+        self.val_losses = []
 
+    def on_batch_end(self, batch, logs={}):
+        self.losses.append(logs.get('loss'))
+        self.val_losses.append(logs.get('val_loss'))
+
+        plt.plot(self.losses)
+        plt.plot(self.val_losses)
+        plt.title('model loss')
+        plt.ylabel('loss')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'valid'], loc='upper left')
+        plt.savefig("loss_plot")
+        
 def sum_count_map(m, ef=PATCH_SIZE):
     return np.asarray([np.sum(p)/ef**2 for p in m])
 
@@ -142,13 +158,15 @@ if TRAIN:
 
     model = build_model()
 
+    history = LossHistory()
     saver = ModelCheckpoint(filepath="model-cp.{epoch:02d}-{val_loss:.2f}.h5",
                             verbose=1, save_weights_only=True)
+
     hist = model.fit_generator(train_generator(batch_size), epochs=epochs,
                                validation_data=(np_dataset_x_valid,
                                                 np_dataset_y_valid),
                                steps_per_epoch=250,
-                               callbacks=[saver])
+                               callbacks=[saver, history])
 
 else:
     model = build_model()
