@@ -176,11 +176,11 @@ def load_many(start, stop):
         print("## Done generating countception target images! ##")
         print()
 
-    np_imgs = np.array(imgs)
+    imgs = np.array(imgs)
     target_imgs = np.array(target_imgs)
     counts = np.array(counts)
 
-    return np_imgs, target_imgs, counts
+    return imgs, target_imgs, counts
 
 
 def pickle_many(start, stop, negative_ratio, file_prefix):
