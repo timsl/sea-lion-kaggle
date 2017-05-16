@@ -94,6 +94,7 @@ def build_model():
 
     return model
 
+
 class LossHistory(keras.callbacks.Callback):
     def on_train_begin(self, logs={}):
         self.losses = []
@@ -110,7 +111,9 @@ class LossHistory(keras.callbacks.Callback):
         plt.xlabel('epoch')
         plt.legend(['train', 'valid'], loc='upper left')
         plt.savefig("loss_plot")
-        
+        plt.clf()
+
+
 def sum_count_map(m, ef=PATCH_SIZE):
     return np.asarray([np.sum(p)/ef**2 for p in m])
 
