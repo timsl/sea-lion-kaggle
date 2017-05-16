@@ -83,8 +83,9 @@ def build_model():
     net9 = ConvFactory(64, 1, 0, net8, "net9")
     net10 = ConvFactory(64, 1, 0, net9, "net10")
     final = Conv2D(1, 1, name="final")(net10)
+    final_relu = LeakyReLU(0.01, name="final_relu")(final)
 
-    model = keras.models.Model(inputs=inputs, outputs=final)
+    model = keras.models.Model(inputs=inputs, outputs=final_relu)
     model.summary()
 
     model.compile(optimizer='adam', loss='mae', learning_rate=0.005)
