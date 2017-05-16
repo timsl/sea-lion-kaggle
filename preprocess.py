@@ -45,7 +45,10 @@ def extract_points(original, dotted, img_id):
     x, y = np.where(np.any(diff > 60, axis=2))
     xy = zip(x, y)
     coords = remove_neighbourhood(xy, neighbourhood)
-    sealioncoords = [SeaLionCoord(img_id, x, y, np.argmin(np.linalg.norm(colors - dotted[x, y], axis=1))) for x, y in coords]
+    sealioncoords = [
+        SeaLionCoord(img_id, x, y,
+                     np.argmin(np.linalg.norm(colors - dotted[x, y], axis=1)))
+        for x, y in coords]
     return sealioncoords
 
 
@@ -60,6 +63,7 @@ def draw_boxes(img, coords):
             img[i.x-size, i.y-size:i.y+size] = color
             img[i.x+size, i.y-size:i.y+size] = color
     return img
+
 
 def countception_target(img, coords, img_n=0, size=256, padsize=16):
     n_x = img.shape[0] // size
@@ -144,7 +148,7 @@ def pickle_save(x, file_name):
         pickle.dump(x, f)
 
 
-def pickle_many(start, stop, file_prefix):
+def load_many(start, stop):
     imgs = []
     target_imgs = []
     counts = []
@@ -169,16 +173,51 @@ def pickle_many(start, stop, file_prefix):
         print("## Done generating countception target images! ##")
         print()
 
-    p_np_imgs = np.array(imgs)
-    p_target_imgs = np.array(target_imgs)
-    p_counts = np.array(counts)
+    imgs = np.array(imgs)
+    target_imgs = np.array(target_imgs)
+    counts = np.array(counts)
 
-    np_imgs, target_imgs, counts = remove_some_negative(p_np_imgs, p_target_imgs, p_counts, 0.0)
+    return imgs, target_imgs, counts
+
+
+def pickle_many(start, stop, negative_ratio, file_prefix):
+    """Pickle images range(start,stop) into files starting with file_prefix."""
+    p_np_imgs, p_target_imgs, p_counts = load_many(start, stop)
+    np_imgs, target_imgs, counts = remove_some_negative(p_np_imgs,
+                                                        p_target_imgs,
+                                                        p_counts,
+                                                        negative_ratio)
 
     pickle_save(np_imgs, file_prefix + "_x.p")
     pickle_save(target_imgs, file_prefix + "_y.p")
     pickle_save(counts, file_prefix + "_c.p")
 
+
+def pickle_valtest(start, stop, negative_ratio,
+                   file_prefixes=("valid", "test"), ratios=(0.2, 1.0)):
+    p_np_imgs, p_target_imgs, p_counts = load_many(start, stop)
+    np_imgs, target_imgs, counts = remove_some_negative(p_np_imgs,
+                                                        p_target_imgs,
+                                                        p_counts,
+                                                        negative_ratio)
+
+    # Removing negatives shuffles the entire set, so no need here
+    n = np_imgs.shape[0]
+    v, t = file_prefixes
+    rv, rt = ratios
+    nv = int(rv*n)
+    nt = int(rt*n)
+
+    pickle_save(np_imgs[0:nv], v + "_x.p")
+    pickle_save(target_imgs[0:nv], v + "_y.p")
+    pickle_save(counts[0:nv], v + "_c.p")
+
+    pickle_save(np_imgs[nv:nt], t + "_x.p")
+    pickle_save(target_imgs[nv:nt], t + "_y.p")
+    pickle_save(counts[nv:nt], t + "_c.p")
+
+
+NEG_RATIO = 0.05
 
 for trip in [
         (0, 100, "train_0"),
@@ -189,8 +228,8 @@ for trip in [
         (500, 600, "train_5"),
         (600, 700, "train_6"),
         (700, 800, "train_7"),
-        (800, 900, "train_8"),
-        (930, 945, "test"),
-        (945, 948, "valid")]:
+        (800, 900, "train_8")]:
     start, end, name = trip
-    pickle_many(start, end, name)
+    pickle_many(start, end, NEG_RATIO, name)
+
+pickle_valtest(900, 948, NEG_RATIO)
