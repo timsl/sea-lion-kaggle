@@ -110,6 +110,9 @@ class LossHistory(keras.callbacks.Callback):
         plt.savefig("loss_plot")
         plt.clf()
 
+        train_val_loss = np.column_stack((np.asarray(self.losses), np.asarray(self.val_losses)))
+        np.savetxt("loss.csv", train_val_loss, delimiter=",")
+
 
 def sum_count_map(m, ef=PATCH_SIZE):
     return np.asarray([np.sum(p)/ef**2 for p in m])
