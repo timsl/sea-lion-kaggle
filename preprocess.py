@@ -68,7 +68,7 @@ def draw_boxes(img, coords):
     return img
 
 
-def countception_target(img, coords, img_n=0, size=256, padsize=32):
+def countception_target(img, coords, img_n=0, size=256, padsize=24):
     n_x = img.shape[0] // size
     n_y = img.shape[1] // size
 
