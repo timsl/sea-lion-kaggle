@@ -65,6 +65,13 @@ def Inception(ch_1x1, ch_3x3, inp, name):
     return concatenate([conv1x1, conv3x3], name=name)
 
 
+def Inception3(ch_1x1, ch_3x3, ch_5x5, inp, name):
+    conv1x1 = ConvFactory(ch_1x1, 1, 0, inp, name + "_1x1")
+    conv3x3 = ConvFactory(ch_3x3, 3, 1, inp, name + "_3x3")
+    conv5x5 = ConvFactory(ch_5x5, 5, 2, inp, name + "_5x5")
+    return concatenate([conv1x1, conv3x3, conv5x5], name=name)
+
+
 def build_model():
     print('#'*80)
     print('# Building model...')
@@ -72,14 +79,14 @@ def build_model():
 
     inputs = Input(shape=(256, 256, 3))
     c1 = ConvFactory(64, 3, PATCH_SIZE, inputs, "c1")
-    net1 = Inception(24, 40, c1, "net1")
-    net2 = Inception(24, 40, net1, "net2")
+    net1 = Inception3(24, 20, 10, c1, "net1")
+    net2 = Inception3(24, 20, 10, net1, "net2")
     red1 = ConvFactory(32, 1, 0, net2, "red1")
     net3 = ConvFactory(32, 15, 0, red1, "net3")
-    net4 = Inception(112, 80, net3, "net4")
-    net5 = Inception(48, 80, net4, "net5")
-    net6 = Inception(48, 80, net5, "net6")
-    net7 = Inception(64, 96, net6, "net7")
+    net4 = Inception3(112, 40, 20, net3, "net4")
+    net5 = Inception3(48, 40, 20, net4, "net5")
+    net6 = Inception3(48, 40, 20, net5, "net6")
+    net7 = Inception3(64, 48, 24, net6, "net7")
     red2 = ConvFactory(32, 1, 0, net7, "red2")
     net8 = ConvFactory(32, 17, 0, red2, "net8")
     net9 = ConvFactory(64, 1, 0, net8, "net9")
