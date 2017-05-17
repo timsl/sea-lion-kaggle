@@ -13,7 +13,7 @@ from keras.layers import (BatchNormalization, Conv2D, Input, ZeroPadding2D,
 from keras.layers.advanced_activations import LeakyReLU
 
 # Whatever was used in preprocessing
-PATCH_SIZE = 32
+PATCH_SIZE = 64
 
 
 def openp(file_name):
@@ -72,22 +72,25 @@ def build_model():
 
     inputs = Input(shape=(256, 256, 3))
     c1 = ConvFactory(64, 3, PATCH_SIZE, inputs, "c1")
-    net1 = Inception(16, 16, c1, "net1")
-    net2 = Inception(16, 32, net1, "net2")
-    net3 = ConvFactory(16, 15, 0, net2, "net3")
-    net4 = Inception(112, 48, net3, "net4")
-    net5 = Inception(64, 32, net4, "net5")
-    net6 = Inception(40, 40, net5, "net6")
-    net7 = Inception(32, 96, net6, "net7")
-    net8 = ConvFactory(32, 17, 0, net7, "net8")
+    net1 = Inception(24, 40, c1, "net1")
+    net2 = Inception(24, 40, net1, "net2")
+    red1 = ConvFactory(24, 1, 0, net2, "red1")
+    net3 = ConvFactory(24, 32, 0, red1, "net3")
+    net4 = Inception(112, 80, net3, "net4")
+    net5 = Inception(48, 80, net4, "net5")
+    net6 = Inception(48, 80, net5, "net6")
+    net7 = Inception(64, 96, net6, "net7")
+    red2 = ConvFactory(24, 1, 0, net7, "red2")
+    net8 = ConvFactory(24, 34, 0, red2, "net8")
     net9 = ConvFactory(64, 1, 0, net8, "net9")
     net10 = ConvFactory(64, 1, 0, net9, "net10")
     final = Conv2D(1, 1, name="final")(net10)
+    final_relu = LeakyReLU(0.01, name="final_relu")(final)
 
     model = keras.models.Model(inputs=inputs, outputs=final)
     model.summary()
 
-    model.compile(optimizer='adam', loss='mae', learning_rate=0.005)
+    model.compile(optimizer='adam', loss='mae', learning_rate=0.001)
 
     return model
 
