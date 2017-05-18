@@ -165,12 +165,14 @@ if TRAIN:
     history = LossHistory()
     saver = ModelCheckpoint(filepath="model-cp.{epoch:02d}-{val_loss:.2f}.h5",
                             verbose=1, save_weights_only=True)
+    bestsaver = ModelCheckpoint(filepath="model.h5", save_best_only=True,
+                                verbose=1, save_weights_only=True)
 
     hist = model.fit_generator(train_generator(batch_size), epochs=epochs,
                                validation_data=(np_dataset_x_valid,
                                                 np_dataset_y_valid),
                                steps_per_epoch=250,
-                               callbacks=[saver, history])
+                               callbacks=[bestsaver, saver, history])
 
 else:
     model = build_model()
