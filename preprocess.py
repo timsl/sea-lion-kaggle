@@ -235,4 +235,5 @@ for trip in [
     start, end, name = trip
     pickle_many(start, end, NEG_RATIO, name)
 
+np.random.seed(17)
 pickle_valtest(900, 948, NEG_RATIO)
