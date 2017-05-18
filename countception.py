@@ -35,7 +35,7 @@ def load_triple(fil_prefix):
 
 
 def train_generator(batch_size):
-    NR_PICKLES = 2
+    NR_PICKLES = 9
 
     while 1:
         for p in range(NR_PICKLES):
@@ -87,7 +87,7 @@ def build_model():
     model = keras.models.Model(inputs=inputs, outputs=final)
     model.summary()
 
-    model.compile(optimizer='adam', loss='mae', learning_rate=0.005)
+    model.compile(optimizer='adam', loss='mse', learning_rate=0.0001)
 
     return model
 
@@ -158,7 +158,7 @@ np_dataset_x_test, np_dataset_y_test, np_dataset_c_test = load_triple("test")
 
 if TRAIN:
     batch_size = 4
-    epochs = 5
+    epochs = 50
 
     model = build_model()
 
@@ -171,7 +171,7 @@ if TRAIN:
     hist = model.fit_generator(train_generator(batch_size), epochs=epochs,
                                validation_data=(np_dataset_x_valid,
                                                 np_dataset_y_valid),
-                               steps_per_epoch=250,
+                               steps_per_epoch=500,
                                callbacks=[bestsaver, saver, history])
 
 else:

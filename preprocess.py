@@ -98,6 +98,8 @@ def countception_target(img, coords, img_n=0, size=256, padsize=16):
             target_img = np.zeros((size+padsize*2, size+padsize*2), dtype=np.uint8)
 
             for i in coords:
+                if i.cls == 4: # Skip pups
+                    continue
                 # In 256x256-coords
                 unpad_x = i.x - xmin
                 unpad_y = i.y - ymin
