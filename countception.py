@@ -35,7 +35,7 @@ def load_triple(fil_prefix):
 
 
 def train_generator(batch_size):
-    NR_PICKLES = 2
+    NR_PICKLES = 9
 
     while 1:
         for p in range(NR_PICKLES):
@@ -65,6 +65,13 @@ def Inception(ch_1x1, ch_3x3, inp, name):
     return concatenate([conv1x1, conv3x3], name=name)
 
 
+def Inception3(ch_1x1, ch_3x3, ch_5x5, inp, name):
+    conv1x1 = ConvFactory(ch_1x1, 1, 0, inp, name + "_1x1")
+    conv3x3 = ConvFactory(ch_3x3, 3, 1, inp, name + "_3x3")
+    conv5x5 = ConvFactory(ch_5x5, 5, 2, inp, name + "_5x5")
+    return concatenate([conv1x1, conv3x3, conv5x5], name=name)
+
+
 def build_model():
     print('#'*80)
     print('# Building model...')
@@ -72,25 +79,29 @@ def build_model():
 
     inputs = Input(shape=(256, 256, 3))
     c1 = ConvFactory(64, 3, PATCH_SIZE, inputs, "c1")
-    net1 = Inception(24, 40, c1, "net1")
-    net2 = Inception(24, 40, net1, "net2")
-    red1 = ConvFactory(16, 1, 0, net2, "red1")
-    net3 = ConvFactory(16, 22, 0, red1, "net3")
-    net4 = Inception(112, 80, net3, "net4")
-    net5 = Inception(48, 80, net4, "net5")
-    net6 = Inception(48, 80, net5, "net6")
-    net7 = Inception(64, 96, net6, "net7")
-    red2 = ConvFactory(16, 1, 0, net7, "red2")
-    net8 = ConvFactory(16, 26, 0, red2, "net8")
-    net9 = ConvFactory(64, 1, 0, net8, "net9")
-    net10 = ConvFactory(64, 1, 0, net9, "net10")
-    final = Conv2D(1, 1, name="final")(net10)
+    net1 = Inception3(24, 20, 10, c1,       "net1")
+    net2 = Inception3(24, 20, 10, net1,     "net2")
+    red1 = ConvFactory(32, 1, 0, net2,      "red1")
+    net3 = ConvFactory(32, 15, 0, red1,     "net3")
+    net4 = Inception3(112, 40, 20, net3,    "net4")
+    net5 = Inception3(48, 40, 20, net4,     "net5")
+
+    red2 = ConvFactory(32, 1, 0, net5,      "red2")
+    net6 = ConvFactory(32, 16, 0, red2,     "net6")
+
+    net7 = Inception3(48, 40, 20, net6,     "net7")
+    net8 = Inception3(64, 48, 24, net7,     "net8")
+    red3 = ConvFactory(32, 1, 0, net8,      "red3")
+    net9 = ConvFactory(32, 17, 0, red3,     "net9")
+    net10 = ConvFactory(64, 1, 0, net9,     "net10")
+    net11 = ConvFactory(64, 1, 0, net10,    "net11")
+    final = Conv2D(1, 1, name="final")(net11)
     final_relu = LeakyReLU(0.01, name="final_relu")(final)
 
-    model = keras.models.Model(inputs=inputs, outputs=final)
+    model = keras.models.Model(inputs=inputs, outputs=final_relu)
     model.summary()
 
-    model.compile(optimizer='adam', loss='mae', learning_rate=0.0001)
+    model.compile(optimizer='adam', loss='mse', learning_rate=0.0001)
 
     return model
 
@@ -161,19 +172,21 @@ np_dataset_x_test, np_dataset_y_test, np_dataset_c_test = load_triple("test")
 
 if TRAIN:
     batch_size = 4
-    epochs = 250
+    epochs = 50
 
     model = build_model()
 
     history = LossHistory()
     saver = ModelCheckpoint(filepath="model-cp.{epoch:02d}-{val_loss:.2f}.h5",
                             verbose=1, save_weights_only=True)
+    bestsaver = ModelCheckpoint(filepath="model.h5", save_best_only=True,
+                                verbose=1, save_weights_only=True)
 
     hist = model.fit_generator(train_generator(batch_size), epochs=epochs,
                                validation_data=(np_dataset_x_valid,
                                                 np_dataset_y_valid),
-                               steps_per_epoch=250,
-                               callbacks=[saver, history])
+                               steps_per_epoch=500,
+                               callbacks=[bestsaver, saver, history])
 
 else:
     model = build_model()

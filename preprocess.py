@@ -98,6 +98,8 @@ def countception_target(img, coords, img_n=0, size=256, padsize=24):
             target_img = np.zeros((size+padsize*2, size+padsize*2), dtype=np.uint8)
 
             for i in coords:
+                if i.cls == 4: # Skip pups
+                    continue
                 # In 256x256-coords
                 unpad_x = i.x - xmin
                 unpad_y = i.y - ymin
@@ -235,4 +237,5 @@ for trip in [
     start, end, name = trip
     pickle_many(start, end, NEG_RATIO, name)
 
+np.random.seed(17)
 pickle_valtest(900, 948, NEG_RATIO)
