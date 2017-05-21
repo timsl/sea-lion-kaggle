@@ -58,7 +58,7 @@ def ConvFactory(filters, kernel_size, padding, inp, name, padding_type='valid', 
         activated = LeakyReLU(0.01, name=name+"_relu")(conv)
         bn = BatchNormalization(name=name+"_bn")(activated)
         out = bn
-    elseif order == "reverse":
+    elif order == "reverse":
         bn = BatchNormalization(name=name+"_bn")(conv)
         activated = LeakyReLU(0.01, name=name+"_relu")(bn)
         out = activated
