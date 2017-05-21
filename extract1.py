@@ -63,7 +63,7 @@ def draw_boxes(img, coords):
 
 
 def countception_target(img, coords, padsize=16):
-    target_img = np.zeros(np.add(img.shape, (2*padsize, 2*padsize, 0)))
+    target_img = np.zeros((img.shape[0] + 2*padsize, img.shape[1] + 2*padsize))
 
     for i in coords:
         x = i.x + padsize
@@ -75,9 +75,7 @@ def countception_target(img, coords, padsize=16):
 
         target_img[(x - padsize):(x + padsize), (y - padsize):(y + padsize)] += 1
 
-    out = np.array( target_img * 255/target_img.max(), dtype=np.uint8)
-    return img, out, []
-
+    return img, target_img, []
 
 def remove_some_negative(x, y, c, negative_ratio=1.0):
     win_mask = c != 0
@@ -133,10 +131,9 @@ def load_many(start, stop):
         plt.imsave("original.png", img[X1:X2, Y1:Y2])
         plt.show()
         img, target_img, count = countception_target(img, sealioncoords)
-        # if target_img.shape[-1] == 1:
-            # target_img = np.reshape(target_img, (target_img.shape[0], target_img.shape[1], target_img.shape[2]))
 
-        plt.imshow(target_img[X1+padsize:X2+padsize, Y1+padsize:Y2+padsize, :], cmap="viridis")
+        print(target_img.shape)
+        plt.imshow(target_img[X1+padsize:X2+padsize, Y1+padsize:Y2+padsize])
         plt.imsave("targets.png", target_img[X1+padsize:X2+padsize, Y1+padsize:Y2+padsize])
         plt.show()
 
