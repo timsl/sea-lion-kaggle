@@ -54,9 +54,9 @@ def ConvFactory(filters, kernel_size, padding, inp, name, padding_type='valid'):
         padded = inp
     conv = Conv2D(filters=filters, kernel_size=kernel_size,
                   padding=padding_type, name=name+"_conv")(padded)
-    activated = LeakyReLU(0.01, name=name+"_relu")(conv)
-    bn = BatchNormalization(name=name+"_bn")(activated)
-    return bn
+    bn = BatchNormalization(name=name+"_bn")(conv)
+    activated = LeakyReLU(0.01, name=name+"_relu")(bn)
+    return activated
 
 
 def Inception(ch_1x1, ch_3x3, inp, name):
@@ -91,10 +91,9 @@ def build_model():
     net8 = ConvFactory(32, 17, 0, red2, "net8")
     net9 = ConvFactory(64, 1, 0, net8, "net9")
     net10 = ConvFactory(64, 1, 0, net9, "net10")
-    final = Conv2D(1, 1, name="final")(net10)
-    final_relu = LeakyReLU(0.01, name="final_relu")(final)
+    final = ConvFactory(1, 1, 0, net10, "final")
 
-    model = keras.models.Model(inputs=inputs, outputs=final_relu)
+    model = keras.models.Model(inputs=inputs, outputs=final)
     model.summary()
 
     model.compile(optimizer='adam', loss='mse', learning_rate=0.0001)
