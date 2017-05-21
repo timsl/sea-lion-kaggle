@@ -51,14 +51,14 @@ def main():
     else:
         img = mpimg.imread("Train/%d.jpg" % i)
         img_dot = mpimg.imread("TrainDotted/%d.jpg" % i)
-        masked = mask_points(img, img_dot)
         X1 = 1350
         X2 = 1900
         Y1 = 3000
         Y2 = 3350
-        plt.imshow(img[X1:X2, Y1:Y2])
-        plt.imsave("extracted_dots.png", masked[X1:X2, Y1:Y2])
         plt.imsave("dotted.png", img_dot[X1:X2, Y1:Y2])
+        masked = mask_points(img, img_dot)
+        plt.imsave("extracted_dots.png", masked[X1:X2, Y1:Y2])
+        plt.imshow(img[X1:X2, Y1:Y2])
         # plt.imshow(masked)
         plt.show()
         # np.save("./masked.npy", masked)
