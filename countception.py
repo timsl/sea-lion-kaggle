@@ -210,5 +210,5 @@ if PRINT_MSE:
     print('!'*40)
     print("Test MAE:", np.mean(np.abs(pred_count-np_dataset_c_test)))
     print("Test MSE:", np.mean((pred_count-np_dataset_c_test)**2))
-    print("Test rounded-count MSE:", np.mean((np.round(pred_count)-np_dataset_c_test)**2))
+    print("Test rounded-count MSE:", np.mean((np.round(np.abs(pred_count))-np_dataset_c_test)**2))
     print('!'*40)
