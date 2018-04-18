@@ -97,7 +97,8 @@ def build_model():
     model = keras.models.Model(inputs=inputs, outputs=final_relu)
     model.summary()
 
-    model.compile(optimizer='adam', loss='mse', learning_rate=0.0001)
+    adam = keras.optimizers.Adam(lr=0.0001)
+    model.compile(optimizer=adam, loss='mse')
 
     return model
 
